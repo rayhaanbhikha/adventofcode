@@ -5,30 +5,27 @@ import (
 	"strings"
 )
 
-func initInputs(inputs ...int) func() int {
-	called := 0
-	return func() int {
-		if called > len(inputs)-1 {
-			return 0
-		}
-		defer func() { called++ }()
-		return inputs[called]
-	}
-}
-
 func parseOpcode(opCode int) (int, []int) {
 	if opCode > 99 {
 
 		sOpCode := strconv.Itoa(opCode)
 		n := len(sOpCode)
-		parsedOpCode := sOpCode[n-2:]
-		newOpCode, _ := strconv.Atoi(parsedOpCode)
+		newOpCode, _ := strconv.Atoi(sOpCode[n-2:])
 
 		params := strings.Split(sOpCode[:n-2], "")
+		pLength := len(params)
+		for i := 0; i < pLength/2; i++ {
+			params[i], params[pLength-(i+1)] = params[pLength-(i+1)], params[i]
+		}
+
 		paramModes := make([]int, 0)
-		for i := len(params) - 1; i >= 0; i-- {
-			mode, _ := strconv.Atoi(params[i])
-			paramModes = append(paramModes, mode)
+		for _, p := range params {
+			num, _ := strconv.Atoi(p)
+			paramModes = append(paramModes, num)
+		}
+
+		for len(paramModes) != paramLength(newOpCode) {
+			paramModes = append(paramModes, 0)
 		}
 
 		return newOpCode, paramModes
@@ -37,7 +34,7 @@ func parseOpcode(opCode int) (int, []int) {
 	switch opCode {
 	case 1, 2, 7, 8:
 		return opCode, []int{0, 0, 0}
-	case 3, 4:
+	case 3, 4, 9:
 		return opCode, []int{0}
 	case 5, 6:
 		return opCode, []int{0, 0}
@@ -48,11 +45,11 @@ func parseOpcode(opCode int) (int, []int) {
 	}
 }
 
-func instructionLength(opCode int) int {
+func paramLength(opCode int) int {
 	switch opCode {
 	case 1, 2, 7, 8:
 		return 3
-	case 3, 4:
+	case 3, 4, 9:
 		return 1
 	case 5, 6:
 		return 2

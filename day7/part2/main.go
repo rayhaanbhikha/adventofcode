@@ -5,49 +5,53 @@ import (
 )
 
 func main() {
-	program := []int{3, 26, 1001, 26, -4, 26, 3, 27, 1002, 27, 2, 27, 1, 27, 26, 27, 4, 27, 1001, 28, -1, 28, 1005, 28, 6, 99, 0, 0, 5}
+	program := []int{3, 8, 1001, 8, 10, 8, 105, 1, 0, 0, 21, 30, 51, 72, 81, 94, 175, 256, 337, 418, 99999, 3, 9, 101, 5, 9, 9, 4, 9, 99, 3, 9, 1001, 9, 3, 9, 1002, 9, 2, 9, 1001, 9, 2, 9, 1002, 9, 5, 9, 4, 9, 99, 3, 9, 1002, 9, 4, 9, 101, 4, 9, 9, 102, 5, 9, 9, 101, 3, 9, 9, 4, 9, 99, 3, 9, 1002, 9, 4, 9, 4, 9, 99, 3, 9, 102, 3, 9, 9, 1001, 9, 4, 9, 4, 9, 99, 3, 9, 1001, 9, 2, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 99, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 1001, 9, 2, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 99, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 99, 3, 9, 1001, 9, 2, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 102, 2, 9, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 1001, 9, 2, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 99, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 101, 2, 9, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 1002, 9, 2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 1001, 9, 2, 9, 4, 9, 3, 9, 1001, 9, 1, 9, 4, 9, 3, 9, 101, 1, 9, 9, 4, 9, 99}
 
-	amplifiers := initaliseAmplifiers([]int{9, 8, 7, 6, 5}, program)
+	maxThrust := 0
+	var maxThrustSequence []int
 
-	lastOutput := 0
+	for _, sequence := range sequences {
+		amplifiers := initaliseAmplifiers(sequence)
 
-	for i := 0; i < 6; i++ {
+		lastOutput := 0
+
 		for _, amplifier := range amplifiers {
+			output := amplifier.runProgram(program, lastOutput)
 
-			output := amplifier.runProgram(lastOutput)
-			fmt.Println(lastOutput, "->", amplifier.name, "->", output)
 			lastOutput = output
 		}
+		if lastOutput > maxThrust {
+			maxThrustSequence = sequence
+			maxThrust = lastOutput
+		}
 	}
-	fmt.Println(lastOutput)
 
-	// amplifiers[0].runProgram(0)
-	// amplifiers[0].runProgram(0)
+	// fmt.Println(amplifiers)
+	fmt.Println(maxThrustSequence, maxThrust)
 
-	fmt.Println(amplifiers[0])
 }
 
-func initaliseAmplifiers(phaseSettings []int, program []int) []Amplifier {
+func initaliseAmplifiers(phaseSettings []int) []Amplifier {
 	amplifiers := make([]Amplifier, 0)
-	names := map[int]string{
-		0: "A",
-		1: "B",
-		2: "C",
-		3: "D",
-		4: "E",
-	}
-	for i, phaseSetting := range phaseSettings {
-		amplifiers = append(amplifiers, Amplifier{names[i], program, phaseSetting})
+	for _, phaseSetting := range phaseSettings {
+		amplifiers = append(amplifiers, Amplifier{phaseSetting})
 	}
 	return amplifiers
 }
 
 type Amplifier struct {
-	name         string
-	program      []int
 	phaseSetting int
 }
 
-func (a *Amplifier) runProgram(input int) int {
-	return runProgram(a.program, a.phaseSetting, input)
+func (a Amplifier) runProgram(program []int, input int) int {
+	p := NewProgram(program, a.phaseSetting, input)
+
+	fmt.Println(len(p.program))
+	for !p.programEnd {
+		p.nextIntcode()
+		p.computeIntcode()
+	}
+	fmt.Println(len(p.program))
+
+	return p.output
 }
