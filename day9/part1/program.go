@@ -21,6 +21,11 @@ type Program struct {
 	currentIndex int
 	intcode      Intcode
 	output       int
+	relativeBase int
+}
+
+func NewProgram(program []int, input int) Program {
+	return Program{programEnd: false, program: program, input: input, currentIndex: 0, relativeBase: 0}
 }
 
 func (p *Program) nextIntcode() {
@@ -46,64 +51,87 @@ func (p *Program) nextIntcode() {
 
 func (p Program) getParamValue(index int) int {
 
-	param := p.intcode.parameters[index-1]
+	param := p.intcode.parameters[index]
 
 	if param.mode == 1 {
 		return param.value
+	} else if param.mode == 2 {
+		return p.get(param.value + p.relativeBase)
 	}
 	return p.get(param.value)
 }
 
 func (p Program) getParam(index int) int {
-	return p.intcode.parameters[index-1].value
+
+	param := p.intcode.parameters[index]
+	if param.mode == 2 {
+		return param.value + p.relativeBase
+	}
+	return param.value
 }
 
 func (p *Program) computeIntcode() {
 
 	switch p.intcode.opCode {
 	case 1:
-		newValue := p.getParamValue(1) + p.getParamValue(2)
-		p.set(p.getParam(3), newValue)
+		newValue := p.getParamValue(0) + p.getParamValue(1)
+		p.set(p.getParam(2), newValue)
 	case 2:
-		newValue := p.getParamValue(1) * p.getParamValue(2)
-		fmt.Println(newValue, p.getParam(3))
-		p.set(p.getParam(3), newValue)
+		newValue := p.getParamValue(0) * p.getParamValue(1)
+		p.set(p.getParam(2), newValue)
 	case 3:
-		p.set(p.getParam(1), p.input)
+		p.set(p.getParam(0), p.input)
 	case 4:
-		p.output = p.getParamValue(1)
+		p.output = p.getParamValue(0)
 	case 5:
-		firstParam, secondParam := p.getParamValue(1), p.getParamValue(2)
+		firstParam, secondParam := p.getParamValue(0), p.getParamValue(1)
 		if firstParam > 0 {
 			p.currentIndex = secondParam
 		}
 	case 6:
-		firstParam, secondParam := p.getParamValue(1), p.getParamValue(2)
+		firstParam, secondParam := p.getParamValue(0), p.getParamValue(1)
 		if firstParam == 0 {
 			p.currentIndex = secondParam
 		}
 	case 7:
-		firstParam, secondParam := p.getParamValue(1), p.getParamValue(2)
+		firstParam, secondParam := p.getParamValue(0), p.getParamValue(1)
 		if firstParam < secondParam {
-			p.set(p.getParam(3), 1)
+			p.set(p.getParam(2), 1)
 		} else {
-			p.set(p.getParam(3), 0)
+			p.set(p.getParam(2), 0)
 		}
 	case 8:
-		firstParam, secondParam := p.getParamValue(1), p.getParamValue(2)
+		firstParam, secondParam := p.getParamValue(0), p.getParamValue(1)
 		if firstParam == secondParam {
-			p.set(p.getParam(3), 1)
+			p.set(p.getParam(2), 1)
 		} else {
-			p.set(p.getParam(3), 0)
+			p.set(p.getParam(2), 0)
 		}
+	case 9:
+		p.relativeBase += p.getParamValue(0)
 	case 99:
 		p.programEnd = true
 	}
 }
 
+func (p *Program) increaseMemory(index int) {
+	zeroArray := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	for len(p.program) <= index {
+		p.program = append(p.program, zeroArray...)
+	}
+	return
+}
+
 func (p Program) get(index int) int {
-	if index > len(p.program) {
-		fmt.Println("TOO high")
+	if index < 0 {
+		fmt.Println("negative index: ", index)
+	}
+	if index >= len(p.program) {
+		// fmt.Println(index, len(p.program))
+		p.increaseMemory(index)
+		// fmt.Println(p.program)
+		// fmt.Println("too high")
+		return p.program[index]
 	}
 	return p.program[index]
 }
@@ -112,8 +140,4 @@ func (p *Program) set(index, value int) {
 	if index < len(p.program) {
 		p.program[index] = value
 	}
-}
-
-func NewProgram(program []int, input int) Program {
-	return Program{programEnd: false, program: program, input: input, currentIndex: 0}
 }

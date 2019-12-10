@@ -34,7 +34,7 @@ func parseOpcode(opCode int) (int, []int) {
 	switch opCode {
 	case 1, 2, 7, 8:
 		return opCode, []int{0, 0, 0}
-	case 3, 4:
+	case 3, 4, 9:
 		return opCode, []int{0}
 	case 5, 6:
 		return opCode, []int{0, 0}
@@ -49,7 +49,7 @@ func paramLength(opCode int) int {
 	switch opCode {
 	case 1, 2, 7, 8:
 		return 3
-	case 3, 4:
+	case 3, 4, 9:
 		return 1
 	case 5, 6:
 		return 2
