@@ -32,10 +32,15 @@ func (p *Program) nextIntcode() {
 	opCode, paramModes := parseOpcode(p.get(p.currentIndex))
 	intcodeLength := p.currentIndex + len(paramModes) + 1
 
-	if opCode == 99 || intcodeLength >= len(p.program) {
+	if intcodeLength >= len(p.program) {
+		p.increaseMemory(intcodeLength)
+	}
+
+	if opCode == 99 {
 		p.programEnd = true
 		return
 	}
+
 	intcode := p.program[p.currentIndex:intcodeLength]
 	parameters := make([]Params, 0)
 
@@ -116,7 +121,7 @@ func (p *Program) computeIntcode() {
 
 func (p *Program) increaseMemory(index int) {
 	zeroArray := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	for len(p.program) <= index {
+	for len(p.program)-1 <= index {
 		p.program = append(p.program, zeroArray...)
 	}
 	return
@@ -126,18 +131,16 @@ func (p Program) get(index int) int {
 	if index < 0 {
 		fmt.Println("negative index: ", index)
 	}
-	if index >= len(p.program) {
-		// fmt.Println(index, len(p.program))
+	if index > len(p.program)-1 {
 		p.increaseMemory(index)
-		// fmt.Println(p.program)
-		// fmt.Println("too high")
 		return p.program[index]
 	}
 	return p.program[index]
 }
 
 func (p *Program) set(index, value int) {
-	if index < len(p.program) {
-		p.program[index] = value
+	if index > len(p.program)-1 {
+		p.increaseMemory(index)
 	}
+	p.program[index] = value
 }

@@ -12,11 +12,12 @@ func main() {
 	// program := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
 	// program := []int{1102, 34915192, 34915192, 7, 4, 7, 99, 0}
 	// program := []int{104, 1125899906842624, 9}
-	runProgram(program, 0)
+	runProgram(program, 1)
 }
 
 func runProgram(program []int, input int) int {
 	p := NewProgram(program, input)
+	fmt.Println(len(p.program))
 
 	for !p.programEnd {
 
@@ -30,7 +31,7 @@ func runProgram(program []int, input int) int {
 	}
 
 	fmt.Println(p.output)
-	// fmt.Println(p.program)
+	fmt.Println(len(p.program))
 
 	return 5
 }
