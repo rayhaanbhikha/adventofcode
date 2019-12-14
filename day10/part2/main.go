@@ -70,6 +70,8 @@ func main() {
 	data, _ := ioutil.ReadFile("input_0")
 	input := string(data)
 	asteroidCoords := getAsteroidCoords(input)
+	n := len(asteroidCoords)
+	fmt.Println(n)
 	laserCoord := coord{8, 3}
 
 	// maxXV, maxYV := 8, 3
@@ -81,21 +83,16 @@ func main() {
 	for v, c := range collectedVectors {
 		angle := 0.00
 
-		angle = math.Atan(math.Abs(v.x)/math.Abs(v.y)) * 180 / math.Pi
-
 		switch {
+		case v.x > 0 && v.y < 0:
+			angle = math.Atan(math.Abs(v.x)/math.Abs(v.y)) * 180 / math.Pi
 		case v.x > 0 && v.y > 0:
-			angle += 90
+			angle = math.Atan(math.Abs(v.y)/math.Abs(v.x))*180/math.Pi + 90
 		case v.x <= 0 && v.y >= 0:
-			angle += 180
+			angle = math.Atan(math.Abs(v.x)/math.Abs(v.x))*180/math.Pi + 180
 		case v.x < 0 && v.y < 0:
-			angle += 270
-
+			angle = math.Atan(math.Abs(v.y)/math.Abs(v.x))*180/math.Pi + 270
 		}
-
-		// if v.y != 0 {
-
-		// }
 
 		if angle == 0 && v.x > 0 {
 			angle = 90
@@ -105,15 +102,12 @@ func main() {
 			angle = 270
 		}
 
-		if angle < 0 {
-			angle += 360
-		}
-
 		points = append(points, pointInfo{v, v.length(), angle, c})
 	}
 
 	sort.Sort(byAngle(points))
 
+	fmt.Println(len(points))
 	// fmt.Println(points)
 
 	for _, p := range points {
