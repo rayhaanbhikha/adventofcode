@@ -81,21 +81,34 @@ func main() {
 	for v, c := range collectedVectors {
 		angle := 0.00
 
-		if v.y != 0 {
-			angle = math.Atan(-1*v.x/v.y) * 180 / math.Pi
+		angle = math.Atan(math.Abs(v.x)/math.Abs(v.y)) * 180 / math.Pi
+
+		switch {
+		case v.x > 0 && v.y > 0:
+			angle += 90
+		case v.x <= 0 && v.y >= 0:
+			angle += 180
+		case v.x < 0 && v.y < 0:
+			angle += 270
+
 		}
 
+		// if v.y != 0 {
+
+		// }
+
 		if angle == 0 && v.x > 0 {
-			angle += 90
+			angle = 90
 		}
 
 		if angle == 0 && v.x < 0 {
-			angle += 270
+			angle = 270
 		}
 
 		if angle < 0 {
 			angle += 360
 		}
+
 		points = append(points, pointInfo{v, v.length(), angle, c})
 	}
 
@@ -104,7 +117,7 @@ func main() {
 	// fmt.Println(points)
 
 	for _, p := range points {
-		fmt.Println(p.v, p.c, p.vAngle)
+		fmt.Println("vec: ", p.v, "\tcoord: ", p.c, "\tangle: ", p.vAngle)
 	}
 
 	fmt.Println("hello world")
