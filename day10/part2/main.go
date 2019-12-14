@@ -9,7 +9,8 @@ import (
 )
 
 type coord struct {
-	x, y float64
+	x, y      float64
+	destroyed bool
 }
 
 type vector struct {
@@ -67,18 +68,60 @@ func test() {
 
 func main() {
 
-	data, _ := ioutil.ReadFile("input_0")
+	data, _ := ioutil.ReadFile("../input")
 	input := string(data)
 	asteroidCoords := getAsteroidCoords(input)
 	n := len(asteroidCoords)
 	fmt.Println(n)
-	laserCoord := coord{8, 3}
+	laserCoord := coord{x: 19, y: 11}
 
-	// maxXV, maxYV := 8, 3
-	// minXV, minYV := 8, 3
+	fmt.Println(asteroidCoords)
+	startingIndex := 1
 
-	collectedVectors := getAsteroidVectors(laserCoord, asteroidCoords)
+	for !allAsteroidsDestroyed(asteroidCoords) {
+		collectedVectors := getAsteroidVectors(laserCoord, asteroidCoords)
+		targets := targetCollectedAsteroids(collectedVectors)
+		startingIndex = destroyTargets(startingIndex, targets, asteroidCoords)
+	}
 
+	fmt.Println(asteroidCoords)
+
+	// for _, p := range points {
+	// 	fmt.Println("vec: ", p.v, "\tcoord: ", p.c, "\tangle: ", p.vAngle)
+	// }
+
+	// for _, asteroidCoord := range asteroidCoords {
+	// 	fmt.Println(asteroidCoord)
+	// }
+
+	fmt.Println("hello world")
+}
+
+func allAsteroidsDestroyed(asteroidCoords []coord) bool {
+	for _, asteroidCoord := range asteroidCoords {
+		if !asteroidCoord.destroyed {
+			return false
+		}
+	}
+	return true
+}
+
+func destroyTargets(startingIndex int, targets []pointInfo, asteroidCoords []coord) int {
+	count := startingIndex
+	for vaporisedCount, p := range targets {
+		for index, asteroidCoord := range asteroidCoords {
+			if p.c.x == asteroidCoord.x && p.c.y == asteroidCoord.y && !asteroidCoord.destroyed {
+				asteroidCoords[index].destroyed = true
+				fmt.Println(vaporisedCount+startingIndex, " ==>> ", asteroidCoord)
+				count++
+				// updateAsteroid(asteroidCoords, index)
+			}
+		}
+	}
+	return count
+}
+
+func targetCollectedAsteroids(collectedVectors map[vector]coord) []pointInfo {
 	points := make([]pointInfo, 0)
 	for v, c := range collectedVectors {
 		angle := 0.00
@@ -106,15 +149,7 @@ func main() {
 	}
 
 	sort.Sort(byAngle(points))
-
-	fmt.Println(len(points))
-	// fmt.Println(points)
-
-	for _, p := range points {
-		fmt.Println("vec: ", p.v, "\tcoord: ", p.c, "\tangle: ", p.vAngle)
-	}
-
-	fmt.Println("hello world")
+	return points
 }
 
 type byAngle []pointInfo
@@ -142,7 +177,7 @@ func getAsteroidVectors(mStation coord, asteroidCoords []coord) map[vector]coord
 	storedVectors := make(map[vector]coord)
 	for _, asteroidCoord := range asteroidCoords {
 		if asteroidCoord.x == mStation.x && asteroidCoord.y == mStation.y {
-		} else {
+		} else if !asteroidCoord.destroyed {
 			addVector(mStation, asteroidCoord, storedVectors)
 		}
 	}
@@ -224,7 +259,7 @@ func getAsteroidCoords(input string) []coord {
 	for y, row := range strings.Split(input, "\n") {
 		for x, value := range strings.Split(row, "") {
 			if value == "#" {
-				asteroidCoords = append(asteroidCoords, coord{x: float64(x), y: float64(y)})
+				asteroidCoords = append(asteroidCoords, coord{x: float64(x), y: float64(y), destroyed: false})
 			}
 		}
 	}
